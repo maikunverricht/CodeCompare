@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SC/SY Code-Vergleich · Kontor</title>
+<meta name="description" content="Funktionsneutrale Code-Änderungen prüfen: Systemkonstanten auflösen und Varianten vergleichen.">
+<meta name="theme-color" content="#06090E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='%2306090E'/%3E%3Cg%20transform='translate%2816%2016%29%20scale%280.19%29%20translate%28-60%20-56%29'%3E%3Cpath%20d='M26%2C16%20V62%20A34%2C34%200%200%200%2094%2C62%20V16'%20fill='none'%20stroke='%23EDF0F3'%20stroke-width='22'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3Ccircle%20cx='60'%20cy='64'%20r='18.5'%20fill='%23F2B33D'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>
+(function(){var t=null;try{t=localStorage.getItem('wb-cockpit-theme')}catch(e){}
+if(t!=='light'&&t!=='dark'){t=window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'}
+document.documentElement.setAttribute('data-theme',t);})();
+</script>
+<style>
+:root{
+  color-scheme:dark;
+  --void:#06090E;
+  --bg-grad:linear-gradient(175deg,#070B11 0%,#0A121B 38%,#0C1620 68%,#080C12 100%);
+  --glass:rgba(16,22,31,.55);
+  --glass-2:rgba(12,17,24,.82);
+  --glass-edge:rgba(255,255,255,.10);
+  --text:#EDF0F3;--text-2:#9BA6B2;--text-3:#6B7683;
+  --line:rgba(255,255,255,.09);
+  --line-hi:rgba(242,179,61,.38);
+  --amber:#F2B33D;--teal:#63D9C4;
+  --em-1:#F2B33D;--em-2:#F7CF83;--em-3:#63D9C4;
+  --rot:#F2766B;
+  --amber-weak:color-mix(in srgb,var(--amber) 14%,transparent);
+  --teal-weak:color-mix(in srgb,var(--teal) 14%,transparent);
+  --rot-weak:color-mix(in srgb,var(--rot) 15%,transparent);
+  --glow-a:rgba(242,179,61,.10);--glow-t:rgba(99,217,196,.08);
+  --shadow:0 18px 46px -22px rgba(0,0,0,.75);
+  --shadow-lg:0 30px 80px -30px rgba(0,0,0,.85);
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --max:1240px;--pad:22px;
+  --t-s:.25s;--t-m:.45s;
+}
+html[data-theme="light"]{
+  color-scheme:light;
+  --void:#EEF1F6;
+  --bg-grad:linear-gradient(175deg,#F5F7FA 0%,#EAEEF4 38%,#E6EBF2 68%,#F2F4F8 100%);
+  --glass:rgba(255,255,255,.62);
+  --glass-2:rgba(248,250,252,.90);
+  --glass-edge:rgba(17,25,35,.10);
+  --text:#111923;--text-2:#4A5563;--text-3:#7A8491;
+  --line:rgba(17,25,35,.10);
+  --line-hi:rgba(224,162,31,.55);
+  --amber:#E0A21F;--teal:#2FA894;
+  --em-1:#C98A0C;--em-2:#E0A21F;--em-3:#2FA894;
+  --rot:#D6442F;
+  --glow-a:rgba(224,162,31,.13);--glow-t:rgba(47,168,148,.10);
+  --shadow:0 18px 40px -24px rgba(30,40,60,.30);
+  --shadow-lg:0 30px 70px -34px rgba(30,40,60,.42);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--void);color:var(--text);font-family:var(--display);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow:hidden;transition:background-color .35s ease,color .35s ease}
+.mono{font-family:var(--mono)}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--text-3) 45%,transparent);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-3)}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* ── Hintergrund ── */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg-grad)}
+.bg i{position:absolute;border-radius:50%;filter:blur(60px)}
+.bg .g1{width:620px;height:620px;left:-180px;top:-240px;background:radial-gradient(circle,var(--glow-a),transparent 70%)}
+.bg .g2{width:720px;height:720px;right:-280px;top:30%;background:radial-gradient(circle,var(--glow-t),transparent 70%)}
+.bg::after{content:"";position:absolute;inset:0;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 0%,transparent 62%);mask-image:radial-gradient(ellipse at 50% 0%,#000 0%,transparent 62%)}
+
+/* ── Navigation ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:40;padding:calc(10px + env(safe-area-inset-top)) var(--pad) 0}
+.nav-in{max-width:var(--max);margin:0 auto;display:flex;align-items:center;gap:14px;height:50px;padding:0 8px 0 16px;
+  border-radius:100px;border:1px solid var(--glass-edge);background:var(--glass);box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(15px) saturate(1.3);backdrop-filter:blur(15px) saturate(1.3)}
+.brand{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:500;letter-spacing:-.01em;white-space:nowrap;color:var(--text)}
+.brand b{font-weight:800;font-variation-settings:'wdth' 112}
+.mark{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex:none;color:var(--text)}
+.mark svg{width:100%;height:100%;display:block;overflow:visible}
+.nav-tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);
+  border-left:1px solid var(--line);padding-left:13px;white-space:nowrap}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.clock{font-family:var(--mono);font-size:12px;color:var(--text-3);letter-spacing:.08em;margin-right:4px}
+.pill{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 13px;border-radius:100px;border:1px solid var(--glass-edge);
+  background:transparent;text-decoration:none;color:var(--text);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:background var(--t-s),border-color var(--t-s)}
+.pill:hover{background:var(--glass);border-color:var(--line-hi)}
+.icon-btn{width:34px;padding:0;justify-content:center}
+.pill svg{width:16px;height:16px;flex:none}
+.sun{display:none}
+html[data-theme="light"] .sun{display:block}
+html[data-theme="light"] .moon{display:none}
+
+/* ── App-Shell ── */
+#app{position:fixed;inset:0;top:0;z-index:1;display:flex;
+  padding:calc(70px + env(safe-area-inset-top)) var(--pad) calc(16px + env(safe-area-inset-bottom));
+  gap:16px;max-width:var(--max);margin:0 auto}
+
+/* ── Sidebar ── */
+#sb{width:252px;min-width:252px;flex-shrink:0;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  border-radius:18px;border:1px solid var(--glass-edge);background:var(--glass);box-shadow:var(--shadow-lg);
+  -webkit-backdrop-filter:blur(15px) saturate(1.3);backdrop-filter:blur(15px) saturate(1.3);transition:width .2s,min-width .2s}
+#sb.closed{width:46px;min-width:46px}
+#sb-tog{position:absolute;bottom:13px;right:11px;z-index:10;width:24px;height:24px;border-radius:7px;
+  border:1px solid var(--line);background:var(--glass-2);cursor:pointer;font-size:11px;color:var(--text-3);
+  display:flex;align-items:center;justify-content:center;transition:border-color var(--t-s),color var(--t-s)}
+#sb-tog:hover{border-color:var(--line-hi);color:var(--text)}
+#sb-body{display:flex;flex-direction:column;height:100%;overflow:hidden;white-space:nowrap;transition:opacity .15s}
+#sb.closed #sb-body{opacity:0;pointer-events:none}
+.sb-logo{padding:17px 18px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:11px;flex-shrink:0}
+.sb-icon{width:34px;height:34px;border-radius:11px;flex:none;display:grid;place-items:center;
+  border:1px solid color-mix(in srgb,var(--amber) 34%,transparent);
+  background:color-mix(in srgb,var(--amber) 13%,transparent);color:var(--amber)}
+.sb-icon svg{width:19px;height:19px;overflow:visible}
+.sb-logo .ttl{font-size:14px;font-weight:700;letter-spacing:-.01em;font-variation-settings:'wdth' 108;color:var(--text)}
+.sb-logo .ver{font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--text-3);margin-top:1px}
+.sb-scroll{flex:1;overflow-y:auto;padding:13px 12px}
+.sb-sec{font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.15em;
+  padding:13px 8px 7px;text-transform:uppercase}
+.sb-nav{width:100%;padding:9px 12px;border-radius:11px;font-size:13.5px;font-weight:500;border:none;background:transparent;
+  color:var(--text-3);text-align:left;display:flex;align-items:center;gap:9px;margin-bottom:2px;cursor:default;opacity:.5;
+  transition:background var(--t-s),color var(--t-s)}
+.sb-nav .ic{width:20px;text-align:center;flex:none;font-size:13px}
+.sb-nav.active{background:var(--amber-weak);color:var(--text);opacity:1}
+.sb-nav.done{color:var(--text-2);opacity:1;cursor:pointer}
+.sb-nav.done:hover{background:var(--glass-2)}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);margin-left:auto;flex:none}
+.infobox{padding:9px 10px;border-radius:11px;background:var(--glass-2);border:1px solid var(--line)}
+.inforow{font-size:12px;color:var(--text-2);margin-bottom:4px;display:flex;align-items:center;gap:7px}
+.inforow:last-child{margin-bottom:0}
+.dot6{width:7px;height:7px;border-radius:50%;flex:none;box-shadow:0 0 0 3px color-mix(in srgb,currentColor 18%,transparent)}
+.inforow span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cv-row{display:flex;align-items:center;gap:8px;padding:6px 9px;margin-bottom:4px;border-radius:9px;border:1px solid var(--line);background:var(--glass-2)}
+.cv-row.on{background:var(--amber-weak);border-color:var(--line-hi)}
+.cv-name{flex:1;font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-opt-pill{padding:7px 10px;border-radius:9px;background:var(--amber-weak);border:1px solid var(--line-hi);
+  font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.04em;color:var(--amber);margin-bottom:4px}
+.res-pill{padding:11px 12px;border-radius:12px;display:none}
+.res-pill.ok{background:var(--teal-weak);border:1px solid color-mix(in srgb,var(--teal) 42%,transparent)}
+.res-pill.bad{background:var(--rot-weak);border:1px solid color-mix(in srgb,var(--rot) 45%,transparent)}
+.res-pill-t{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.res-pill.ok .res-pill-t{color:var(--teal)}
+.res-pill.bad .res-pill-t{color:var(--rot)}
+.res-pill-s{font-family:var(--mono);font-size:10.5px;color:var(--text-2);margin-top:3px}
+#sb-reset{padding:12px;border-top:1px solid var(--line);flex-shrink:0;display:none}
+#sb-reset button{width:100%;padding:9px 12px;border-radius:11px;cursor:pointer;font-size:12.5px;font-weight:500;
+  border:1px solid var(--line);background:transparent;color:var(--text-2);transition:border-color var(--t-s),color var(--t-s)}
+#sb-reset button:hover{border-color:var(--line-hi);color:var(--text)}
+
+/* ── Toggle ── */
+.tog{position:relative;width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;flex:none;transition:background .2s}
+.tog.on{background:var(--amber)}
+.tog.off{background:color-mix(in srgb,var(--text-3) 40%,transparent)}
+.tog-k{position:absolute;top:3px;width:16px;height:16px;background:#fff;border-radius:8px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.tog.on .tog-k{left:21px}
+.tog.off .tog-k{left:3px}
+
+/* ── Main workspace ── */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;
+  border-radius:18px;border:1px solid var(--glass-edge);background:var(--glass);box-shadow:var(--shadow-lg);
+  -webkit-backdrop-filter:blur(15px) saturate(1.3);backdrop-filter:blur(15px) saturate(1.3)}
+#topbar{padding:15px 22px;display:flex;align-items:center;flex-shrink:0;border-bottom:1px solid var(--line)}
+#topbar h1{font-size:18px;font-weight:700;letter-spacing:-.025em;font-variation-settings:'wdth' 106;margin:0}
+#stepper{margin-left:auto;display:flex;align-items:center;gap:6px}
+.sn{display:flex;align-items:center;gap:6px}
+.sc{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);
+  font-size:9px;font-weight:500;border:1px solid var(--line);background:var(--glass-2);color:var(--text-3);flex:none}
+.sc.active{background:var(--amber);border-color:var(--amber);color:#12171F}
+.sc.done{background:color-mix(in srgb,var(--teal) 20%,transparent);border-color:var(--teal);color:var(--teal)}
+.sl{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text-3)}
+.sl.active{color:var(--text)}
+.sl.done{color:var(--text-2)}
+.sline{width:20px;height:1px;background:var(--line)}
+.sline.done{background:color-mix(in srgb,var(--teal) 50%,transparent)}
+
+/* ── Buttons ── */
+.btn{border:none;border-radius:11px;padding:10px 20px;font-size:13.5px;font-weight:600;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:filter var(--t-s),background var(--t-s),border-color var(--t-s)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-p{background:var(--amber);color:#12171F}
+.btn-p:not(:disabled):hover{filter:brightness(1.07)}
+.btn-s{background:transparent;color:var(--text-2);border:1px solid var(--line)}
+.btn-s:hover{border-color:var(--line-hi);color:var(--text)}
+.filt{padding:6px 13px;border-radius:100px;cursor:pointer;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;font-weight:500;
+  border:1px solid var(--line);background:transparent;color:var(--text-3);margin-left:auto;transition:border-color var(--t-s),color var(--t-s),background var(--t-s)}
+.filt:hover{border-color:var(--line-hi);color:var(--text)}
+.filt.on{border-color:var(--line-hi);background:var(--amber-weak);color:var(--amber)}
+
+/* ── Steps ── */
+.step{flex:1;display:none;flex-direction:column;overflow:hidden}
+.step.on{display:flex}
+
+/* Step 0 Upload */
+.dz-wrap{display:flex;gap:16px;flex:1;overflow:hidden;padding:18px 22px 0}
+.dz{flex:1;display:flex;flex-direction:column;overflow:hidden;border-radius:14px;border:1px solid var(--line);background:var(--glass-2)}
+.dz-head{padding:13px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;transition:background var(--t-s)}
+.dz-head.loaded{background:var(--teal-weak)}
+.dz-hd{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--text-3) 55%,transparent);flex:none}
+.dz-head.loaded .dz-hd{background:var(--teal);box-shadow:0 0 0 3px color-mix(in srgb,var(--teal) 22%,transparent)}
+.dz-htitle{font-size:13.5px;font-weight:700;letter-spacing:-.01em}
+.dz-hname{font-family:var(--mono);font-size:11px;color:var(--teal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;margin-left:auto;display:none}
+.dz-drop{padding:14px 16px;text-align:center;cursor:pointer;transition:background var(--t-s);border-bottom:1px solid var(--line)}
+.dz-drop:hover,.dz-drop.over{background:var(--amber-weak)}
+.dz-drop-ico{font-size:22px;margin-bottom:4px;filter:grayscale(.2)}
+.dz-drop-lbl{font-size:12.5px;color:var(--text-2);font-weight:500}
+.dz-drop-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);margin-top:3px;letter-spacing:.03em}
+.dz-ta{padding:9px 14px 14px;flex:1;display:flex;flex-direction:column;gap:6px}
+.dz-ta-lbl{font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:.1em}
+.dz-ta textarea{flex:1;min-height:120px;width:100%;background:var(--void);border:1px solid var(--line);border-radius:11px;
+  padding:10px 12px;font-family:var(--mono);font-size:11.5px;color:var(--text);line-height:1.6;resize:vertical;outline:none;transition:border-color var(--t-s)}
+.dz-ta textarea:focus{border-color:var(--line-hi)}
+.dz-ta textarea::placeholder{color:var(--text-3)}
+#u-foot{margin:16px 22px;padding:13px 16px;border-radius:13px;border:1px solid var(--line);background:var(--glass-2);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.u-foot-lbl{font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.06em;color:var(--text-2);flex-shrink:0;text-transform:uppercase}
+.u-hint{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+.chip{padding:3px 11px;border-radius:100px;background:color-mix(in srgb,var(--teal) 13%,transparent);
+  border:1px solid color-mix(in srgb,var(--teal) 34%,transparent);font-family:var(--mono);font-size:11px;font-weight:500;color:var(--teal)}
+
+/* Step 1 Config */
+#s1 .inner{max-width:720px;margin:0 auto;padding:18px 22px}
+.cfg-hint{margin-bottom:16px;padding:12px 15px;border-radius:12px;border:1px solid var(--line);background:var(--glass-2);font-size:13px;color:var(--text-2)}
+.cfg-sec-lbl{font-family:var(--mono);font-size:10px;color:var(--text-3);font-weight:500;letter-spacing:.15em;margin-bottom:9px;text-transform:uppercase}
+.ccard{display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:13px;border:1px solid var(--line);background:var(--glass-2);margin-bottom:10px;transition:border-color var(--t-s)}
+.ccard.on{border-color:var(--line-hi)}
+.cname{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text)}
+.csub{font-size:12px;color:var(--text-3);margin-top:3px;line-height:1.5}
+.csub code{font-family:var(--mono);font-size:10.5px;background:var(--void);padding:1px 6px;border-radius:5px;border:1px solid var(--line);color:var(--text-2)}
+.cbadge{font-family:var(--mono);font-size:10.5px;font-weight:500;padding:4px 10px;border-radius:100px;white-space:nowrap;letter-spacing:.03em}
+.cbadge.on{background:var(--amber-weak);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent)}
+.cbadge.off{background:color-mix(in srgb,var(--text-3) 12%,transparent);color:var(--text-3);border:1px solid var(--line)}
+.prev-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+.prev-card{border-radius:13px;border:1px solid var(--line);background:var(--glass-2);overflow:hidden}
+.prev-head{padding:9px 13px;border-bottom:1px solid var(--line);background:var(--void);display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text-2)}
+.prev-body{max-height:190px;overflow:auto;padding:11px 13px;font-family:var(--mono);font-size:10.5px;line-height:1.75;color:var(--text-2);white-space:pre}
+#cfg-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:10px;flex-shrink:0}
+
+/* Step 2 Result */
+#res-ban{padding:16px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
+.ban{display:inline-flex;align-items:center;padding:12px 20px;border-radius:13px}
+.ban.ok{background:var(--teal-weak);border:1px solid color-mix(in srgb,var(--teal) 42%,transparent)}
+.ban.bad{background:var(--rot-weak);border:1px solid color-mix(in srgb,var(--rot) 45%,transparent)}
+.ban-t{font-size:15px;font-weight:700;letter-spacing:-.015em}
+.ban.ok .ban-t{color:var(--teal)}
+.ban.bad .ban-t{color:var(--rot)}
+.ban-s{font-family:var(--mono);font-size:11px;color:var(--text-2);margin-top:3px}
+#res-tabs{padding:10px 22px;border-bottom:1px solid var(--line);display:flex;gap:7px;align-items:center;flex-shrink:0}
+.tab{padding:7px 14px;border-radius:100px;cursor:pointer;font-size:12.5px;font-weight:500;border:1px solid var(--line);
+  background:transparent;color:var(--text-3);transition:border-color var(--t-s),color var(--t-s),background var(--t-s)}
+.tab:hover{border-color:var(--line-hi);color:var(--text)}
+.tab.on{border-color:var(--line-hi);background:var(--amber-weak);color:var(--text)}
+#res-body{flex:1;overflow:auto;padding:16px 22px}
+.dtbl{border-radius:13px;border:1px solid var(--line);background:var(--glass-2);overflow:hidden;min-width:480px}
+.dhrow{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.dhcell{padding:9px 13px;font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text-2);background:var(--void);display:flex;align-items:center;gap:7px}
+.dhcell:first-child{border-right:1px solid var(--line)}
+.drow{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+.drow.ch .dl{color:var(--rot);background:var(--rot-weak)}
+.drow.ch .dr{color:var(--teal);background:var(--teal-weak)}
+.dl,.dr{padding:3px 13px;font-family:var(--mono);font-size:11px;white-space:pre;overflow:hidden;text-overflow:ellipsis;color:var(--text-3)}
+.dl{border-right:1px solid var(--line)}
+.dempty{padding:40px;text-align:center;color:var(--teal);font-size:13.5px;font-weight:600}
+.cbox{border-radius:13px;border:1px solid var(--line);background:var(--glass-2);padding:15px 17px}
+.cbox pre{margin:0;font-family:var(--mono);font-size:12px;line-height:1.75;color:var(--text);white-space:pre-wrap;word-break:break-word}
+#res-foot{padding:11px 22px;border-top:1px solid var(--line);display:flex;align-items:center;gap:9px;flex-wrap:wrap;flex-shrink:0}
+.foot-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--text-3);text-transform:uppercase}
+.vb{font-family:var(--mono);font-size:10.5px;font-weight:500;padding:3px 10px;border-radius:100px}
+.vb.on{background:var(--amber-weak);color:var(--amber);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent)}
+.vb.off{background:color-mix(in srgb,var(--text-3) 12%,transparent);color:var(--text-3);border:1px solid var(--line)}
+
+@media (max-width:760px){
+  :root{--pad:14px}
+  .nav-tag,.clock,.hide-sm{display:none}
+  #app{flex-direction:column;padding-top:66px}
+  #sb{width:auto;min-width:0;max-height:none}
+  #sb.closed{width:auto;min-width:0}
+  #sb-tog{display:none}
+  .prev-grid{grid-template-columns:1fr}
+  .dz-wrap{flex-direction:column;overflow:auto}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true"><i class="g1"></i><i class="g2"></i></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <a class="brand" href="https://maikunverricht.github.io/WerkbankUnverricht/">
+      <span class="mark" aria-hidden="true"><svg viewBox="15 5 90 102"><path d="M26,16 V62 A34,34 0 0 0 94,62 V16" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="64" r="18.5" fill="var(--amber,#F2B33D)"/></svg></span>
+      <b>Kontor</b>
+    </a>
+    <span class="nav-tag">SC/SY Code-Vergleich</span>
+    <div class="nav-r">
+      <span class="clock" id="clock"></span>
+      <a class="pill hide-sm" href="https://maikunverricht.github.io/WerkbankUnverricht/">Werkbank ↗</a>
+      <button class="pill icon-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="app">
+
+<!-- SIDEBAR -->
+<div id="sb">
+  <button id="sb-tog">◀</button>
+  <div id="sb-body">
+    <div class="sb-logo">
+      <div class="sb-icon"><svg viewBox="15 5 90 102" aria-hidden="true"><path d="M26,16 V62 A34,34 0 0 0 94,62 V16" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="64" r="18.5" fill="currentColor"/></svg></div>
+      <div>
+        <div class="ttl">Code-Vergleich</div>
+        <div class="ver">v1.6.0 · SC/SY</div>
+      </div>
+    </div>
+    <div class="sb-scroll">
+      <div class="sb-sec" style="padding-top:4px">Workflow</div>
+      <div id="sbn0" class="sb-nav active"><span class="ic">◆</span>Dateien laden<span class="sb-dot"></span></div>
+      <div id="sbn1" class="sb-nav"><span class="ic">◇</span>Konstanten</div>
+      <div id="sbn2" class="sb-nav"><span class="ic">⇄</span>Vergleich</div>
+
+      <div id="sb-fsec" class="sb-sec" style="display:none">Dateien</div>
+      <div id="sb-fbox" class="infobox" style="display:none;margin-bottom:4px">
+        <div class="inforow" style="color:var(--amber)"><div class="dot6" style="background:var(--amber)"></div><span id="sfo" style="color:var(--text-2)">Original</span></div>
+        <div class="inforow" style="color:var(--teal)"><div class="dot6" style="background:var(--teal)"></div><span id="sfm" style="color:var(--text-2)">Modifiziert</span></div>
+      </div>
+
+      <div id="sb-csec" class="sb-sec" style="display:none">Konstanten</div>
+      <div id="sb-cv"></div>
+
+      <div id="sb-osec" class="sb-sec" style="display:none">Filter aktiv</div>
+      <div id="sb-opts" class="sb-opt-pill" style="display:none">⚡ _t… Variablen ignoriert</div>
+
+      <div id="sb-rsec" class="sb-sec" style="display:none">Ergebnis</div>
+      <div id="sb-res" class="res-pill">
+        <div class="res-pill-t" id="sb-rt"></div>
+        <div class="res-pill-s" id="sb-rs"></div>
+      </div>
+    </div>
+    <div id="sb-reset"><button onclick="resetAll()">↺ Neu starten</button></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <!-- Topbar -->
+  <div id="topbar">
+    <h1 id="ttitle">Dateien laden</h1>
+    <div id="stepper">
+      <div class="sn"><div class="sc active" id="sc0">01</div><span class="sl active" id="sl0">Laden</span></div>
+      <div class="sline" id="sln0"></div>
+      <div class="sn"><div class="sc" id="sc1">02</div><span class="sl" id="sl1">Konstanten</span></div>
+      <div class="sline" id="sln1"></div>
+      <div class="sn"><div class="sc" id="sc2">03</div><span class="sl" id="sl2">Vergleich</span></div>
+    </div>
+  </div>
+
+  <!-- STEP 0 -->
+  <div class="step on" id="s0" style="flex-direction:column">
+    <div class="dz-wrap">
+      <!-- Original -->
+      <div class="dz">
+        <div class="dz-head" id="dh0">
+          <div class="dz-hd"></div>
+          <span class="dz-htitle">Original-Datei</span>
+          <span class="dz-hname" id="dname0"></span>
+        </div>
+        <div class="dz-drop" id="ddrop0">
+          <div class="dz-drop-ico" id="dico0">📂</div>
+          <div class="dz-drop-lbl" id="dlbl0">Datei ablegen oder klicken</div>
+          <div class="dz-drop-sub">.c · .cpp · .h · .txt · beliebig</div>
+          <input type="file" id="finp0" style="display:none">
+        </div>
+        <div class="dz-ta">
+          <div class="dz-ta-lbl">Oder direkt einfügen</div>
+          <textarea id="ta0" placeholder="// Code hier einfügen…"></textarea>
+        </div>
+      </div>
+      <!-- Modified -->
+      <div class="dz">
+        <div class="dz-head" id="dh1">
+          <div class="dz-hd"></div>
+          <span class="dz-htitle">Modifizierte Datei</span>
+          <span class="dz-hname" id="dname1"></span>
+        </div>
+        <div class="dz-drop" id="ddrop1">
+          <div class="dz-drop-ico" id="dico1">📂</div>
+          <div class="dz-drop-lbl" id="dlbl1">Datei ablegen oder klicken</div>
+          <div class="dz-drop-sub">.c · .cpp · .h · .txt · beliebig</div>
+          <input type="file" id="finp1" style="display:none">
+        </div>
+        <div class="dz-ta">
+          <div class="dz-ta-lbl">Oder direkt einfügen</div>
+          <textarea id="ta1" placeholder="// Code hier einfügen…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div id="u-foot">
+      <span class="u-foot-lbl">🔍 Konstanten</span>
+      <span id="uhint" class="u-hint">Bitte Code laden…</span>
+      <div id="uchips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div style="margin-left:auto"><button class="btn btn-p" id="bnext" onclick="goConfig()" disabled>Weiter →</button></div>
+    </div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step" id="s1" style="flex-direction:column;overflow:hidden">
+    <div style="flex:1;overflow-y:auto">
+      <div class="inner">
+        <div class="cfg-hint">Lege den Wert jeder Systemkonstante fest. Der Code wird entsprechend reduziert.</div>
+
+        <!-- Filter-Optionen -->
+        <div style="margin-bottom:16px">
+          <div class="cfg-sec-lbl">Filter-Optionen</div>
+          <div id="opt-t-card" class="ccard">
+            <div style="flex:1">
+              <div class="cname" style="font-size:13px">_t… Variablen ignorieren</div>
+              <div class="csub">Zeilen mit Typ-Bezeichnern wie <code>uint8_t</code>, <code>myVar_t</code> werden vom Vergleich ausgeschlossen</div>
+            </div>
+            <span class="cbadge off" id="opt-t-badge">Deaktiviert</span>
+            <button class="tog off" id="opt-t-tog"><div class="tog-k"></div></button>
+          </div>
+        </div>
+        <div id="ccards"></div>
+        <div id="noc" style="display:none;text-align:center;padding:30px;color:var(--text-3);font-size:13px">Keine *_SC / *_SY Konstanten — direkt vergleichen</div>
+        <div class="prev-grid">
+          <div class="prev-card">
+            <div class="prev-head"><div style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></div><span id="ptit0">Original (Vorschau)</span></div>
+            <div class="prev-body" id="pbody0"></div>
+          </div>
+          <div class="prev-card">
+            <div class="prev-head"><div style="width:6px;height:6px;border-radius:50%;background:var(--teal)"></div><span id="ptit1">Modifiziert (Vorschau)</span></div>
+            <div class="prev-body" id="pbody1"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="cfg-foot">
+      <button class="btn btn-s" onclick="goStep(0)">← Zurück</button>
+      <button class="btn btn-p" onclick="runCmp()">⇄ Vergleich starten</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="s2" style="flex-direction:column;overflow:hidden">
+    <div id="res-ban">
+      <div class="ban" id="ban">
+        <div>
+          <div class="ban-t" id="bant"></div>
+          <div class="ban-s" id="bans"></div>
+        </div>
+      </div>
+    </div>
+    <div id="res-tabs">
+      <button class="tab on" id="tab0" onclick="setTab(0)">⇄ Diff-Ansicht</button>
+      <button class="tab"    id="tab1" onclick="setTab(1)">📄 Original</button>
+      <button class="tab"    id="tab2" onclick="setTab(2)">📝 Modifiziert</button>
+      <button class="filt"   id="filtbtn" onclick="togFilt()" style="display:none">Nur Unterschiede</button>
+    </div>
+    <div id="res-body">
+      <div id="view0">
+        <div class="dtbl">
+          <div class="dhrow">
+            <div class="dhcell"><div style="width:6px;height:6px;border-radius:50%;background:var(--amber)"></div><span id="dhd0">Original</span></div>
+            <div class="dhcell"><div style="width:6px;height:6px;border-radius:50%;background:var(--teal)"></div><span id="dhd1">Modifiziert</span></div>
+          </div>
+          <div id="drows"></div>
+        </div>
+      </div>
+      <div id="view1" style="display:none"><div class="cbox"><pre id="cpre0"></pre></div></div>
+      <div id="view2" style="display:none"><div class="cbox"><pre id="cpre1"></pre></div></div>
+    </div>
+    <div id="res-foot">
+      <span class="foot-lbl">Konstanten</span>
+      <div id="footb" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div style="margin-left:auto"><button class="btn btn-s" onclick="goStep(1)">← Zurück</button></div>
+    </div>
+  </div>
+
+</div><!-- #main -->
+</div><!-- #app -->
+
+<script>
+// ── State ──────────────────────────────────────────────────
+var codes  = ['', ''];
+var names  = ['', ''];
+var consts = [];
+var vals   = {};
+var dlines = [];
+var hasDiff  = false;
+var onlyDiff = false;
+var ignoreT  = false;
+var curStep = 0;
+var curTab  = 0;
+
+// ── Helpers ────────────────────────────────────────────────
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function getConsts(code) {
+  var found = {}, re = /^\s*#\s*(?:ifdef|ifndef|if|elif)\s+(.*)/gm, m;
+  while ((m = re.exec(code)) !== null) {
+    var ids = m[1].match(/\b\w+(?:_SC|_SY)\b/g);
+    if (ids) ids.forEach(function(id){ found[id] = true; });
+  }
+  return Object.keys(found);
+}
+
+function evalExpr(expr, v) {
+  var e = expr;
+  // defined(X) / defined X  → 1 if constant is TRUE, else 0
+  e = e.replace(/\bdefined\s*\(\s*(\w+)\s*\)/g, function(_, n){ return v[n] ? '1' : '0'; });
+  e = e.replace(/\bdefined\s+(\w+)/g,            function(_, n){ return v[n] ? '1' : '0'; });
+  // known constants → 1/0
+  Object.keys(v).forEach(function(k){
+    e = e.replace(new RegExp('\\b' + k + '\\b', 'g'), v[k] ? '1' : '0');
+  });
+  // remaining bare identifiers (undefined macros) → 0  (C #if semantics)
+  e = e.replace(/\b[A-Za-z_]\w*\b/g, '0');
+  try { return (new Function('"use strict";return !!(' + e + ');'))(); }
+  catch(x) { return false; }
+}
+
+function reduce(code, v) {
+  var lines = code.split('\n'), out = [], stack = [];
+  // Only *_SC / *_SY ('scsy') frames are resolved; all other directives
+  // ('pass' frames) are preserved verbatim and don't affect activity.
+  function active(){ return stack.every(function(s){ return s.type !== 'scsy' || s.a; }); }
+  function outerActive(){ return stack.slice(0,-1).every(function(s){ return s.type !== 'scsy' || s.a; }); }
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i], t = line.trim();
+    var mId  = t.match(/^#\s*ifdef\s+(\w+)/);
+    var mNd  = t.match(/^#\s*ifndef\s+(\w+)/);
+    var mIf  = !mId && !mNd && t.match(/^#\s*if\s+(.*)/);
+    var mEl  = t.match(/^#\s*elif\s+(.*)/);
+    var mElse  = /^#\s*else\b/.test(t);
+    var mEnd   = /^#\s*endif\b/.test(t);
+    var sc     = /\b\w+(?:_SC|_SY)\b/.test(t);
+    if (mId || mNd || mIf) {
+      if (sc) {
+        var c = mId ? !!v[mId[1]] : mNd ? !v[mNd[1]] : evalExpr(mIf[1], v);
+        stack.push({ type: 'scsy', a: active() && c, s: c });
+      } else {
+        if (active()) out.push(line);
+        stack.push({ type: 'pass' });
+      }
+    }
+    else if (mEl) {
+      var p = stack[stack.length - 1];
+      if (p && p.type === 'scsy') {
+        if (p.s) { p.a = false; }
+        else { var c = evalExpr(mEl[1], v); p.a = outerActive() && c; if (c) p.s = true; }
+      } else { if (active()) out.push(line); }
+    }
+    else if (mElse) {
+      var p = stack[stack.length - 1];
+      if (p && p.type === 'scsy') { p.a = !p.s && outerActive(); }
+      else { if (active()) out.push(line); }
+    }
+    else if (mEnd) {
+      var p = stack.pop();
+      if (p && p.type === 'pass' && active()) out.push(line);
+    }
+    else { if (active()) out.push(line); }
+  }
+  return out.join('\n');
+}
+
+function isComment(line) {
+  var t = line.trim();
+  return t === '' || t.startsWith('//') || t.startsWith('*') || t.startsWith('/*');
+}
+
+function containsTypeVar(line) {
+  // Matches identifiers ending in _t (uint8_t, size_t, result_t) or _t followed
+  // by a camelCase continuation (_tWheelSpeed). Avoids false positives like
+  // next_token, foo_table, call_this where _t sits mid-word.
+  return /\b\w*_t([A-Z]\w*)?\b/.test(line);
+}
+
+function norm(code) {
+  return code.split('\n')
+    .map(function(l){ return l.trim(); })
+    .filter(function(l){
+      if (!l.length || isComment(l)) return false;
+      if (ignoreT && containsTypeVar(l)) return false;
+      return true;
+    })
+    .join('\n');
+}
+
+// LCS-based diff with comment stripping + smart pairing
+function makeDiff(a, b) {
+  var aL = a.split('\n').filter(function(l){ return l.length > 0; });
+  var bL = b.split('\n').filter(function(l){ return l.length > 0; });
+  var n = aL.length, m = bL.length;
+
+  // Cap for performance
+  var capN = Math.min(n, 600), capM = Math.min(m, 600);
+
+  // Build LCS DP table
+  var dp = [];
+  for (var i = 0; i <= capN; i++) { dp[i] = new Array(capM + 1).fill(0); }
+  for (var i = 1; i <= capN; i++) {
+    for (var j = 1; j <= capM; j++) {
+      if (aL[i-1] === bL[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+      else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+    }
+  }
+
+  // Backtrack
+  var ops = [], hd = false;
+  var i = capN, j = capM;
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && aL[i-1] === bL[j-1]) {
+      ops.push({ t: 's', l: aL[i-1], r: bL[j-1] }); i--; j--;
+    } else if (j > 0 && (i === 0 || dp[i][j-1] >= dp[i-1][j])) {
+      ops.push({ t: 'add', l: '', r: bL[j-1] }); hd = true; j--;
+    } else {
+      ops.push({ t: 'del', l: aL[i-1], r: '' }); hd = true; i--;
+    }
+  }
+  for (var x = capN; x < n; x++) { ops.push({ t: 'del', l: aL[x], r: '' }); hd = true; }
+  for (var x = capM; x < m; x++) { ops.push({ t: 'add', l: '', r: bL[x] }); hd = true; }
+  ops.reverse();
+
+  // Pair consecutive del+add as side-by-side changed rows
+  var paired = [], k = 0;
+  while (k < ops.length) {
+    if (ops[k].t === 'del' && k + 1 < ops.length && ops[k+1].t === 'add') {
+      paired.push({ t: 'c', l: ops[k].l, r: ops[k+1].r }); k += 2;
+    } else if (ops[k].t === 'del') {
+      paired.push({ t: 'c', l: ops[k].l, r: '' }); k++;
+    } else if (ops[k].t === 'add') {
+      paired.push({ t: 'c', l: '', r: ops[k].r }); k++;
+    } else {
+      paired.push(ops[k]); k++;
+    }
+  }
+
+  return { lines: paired, hasDiff: hd };
+}
+
+// ── Sidebar toggle ─────────────────────────────────────────
+document.getElementById('sb-tog').addEventListener('click', function(){
+  var sb = document.getElementById('sb');
+  var open = sb.classList.toggle('closed');
+  this.textContent = open ? '▶' : '◀';
+});
+
+// ── Dropzone wiring ────────────────────────────────────────
+[0, 1].forEach(function(i) {
+  var drop = document.getElementById('ddrop' + i);
+  var inp  = document.getElementById('finp' + i);
+  var ta   = document.getElementById('ta' + i);
+
+  drop.addEventListener('click', function(){ inp.click(); });
+  drop.addEventListener('dragover',  function(e){ e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', function(){  drop.classList.remove('over'); });
+  drop.addEventListener('drop', function(e){
+    e.preventDefault(); drop.classList.remove('over');
+    var f = e.dataTransfer.files[0];
+    if (f) readFile(f, i);
+  });
+  inp.addEventListener('change', function(e){
+    var f = e.target.files[0];
+    if (f) readFile(f, i);
+  });
+  ta.addEventListener('input', function(){
+    setCode(i, ta.value, i === 0 ? 'original.c' : 'modified.c');
+  });
+});
+
+function readFile(file, i) {
+  var r = new FileReader();
+  r.onload = function(e){ setCode(i, e.target.result, file.name, true); };
+  r.readAsText(file);
+}
+
+function setCode(i, code, name, fromFile) {
+  codes[i] = code;
+  names[i] = name;
+  // update dropzone
+  var head = document.getElementById('dh' + i);
+  head.classList.toggle('loaded', !!code);
+  var nm = document.getElementById('dname' + i);
+  nm.textContent = '✓ ' + name;
+  nm.style.display = code ? '' : 'none';
+  document.getElementById('dico' + i).textContent = code ? '📄' : '📂';
+  document.getElementById('dlbl' + i).textContent = code ? 'Andere Datei wählen' : 'Datei ablegen oder klicken';
+  // mirror file content into the textarea (only when loaded from a file,
+  // so typing in the textarea doesn't fight the cursor)
+  if (fromFile) {
+    document.getElementById('ta' + i).value = code;
+  }
+  updateFooter();
+}
+
+function updateFooter() {
+  var all = getConsts(codes[0] + '\n' + codes[1]);
+  var seen = {}, uniq = [];
+  all.forEach(function(c){ if (!seen[c]) { seen[c] = true; uniq.push(c); } });
+  consts = uniq;
+
+  var hint  = document.getElementById('uhint');
+  var chips = document.getElementById('uchips');
+  chips.innerHTML = '';
+  if (!codes[0] && !codes[1]) {
+    hint.textContent = 'Bitte Code laden…'; hint.style.display = '';
+  } else if (!uniq.length) {
+    hint.textContent = 'Keine *_SC / *_SY Konstanten gefunden'; hint.style.display = '';
+  } else {
+    hint.style.display = 'none';
+    uniq.forEach(function(c){
+      var s = document.createElement('span');
+      s.className = 'chip'; s.textContent = c;
+      chips.appendChild(s);
+    });
+  }
+  document.getElementById('bnext').disabled = !(codes[0] && codes[1]);
+}
+
+// ── Config ─────────────────────────────────────────────────
+function goConfig() {
+  consts.forEach(function(c){ if (vals[c] === undefined) vals[c] = true; });
+  goStep(1);
+  buildCards();
+  updatePrev();
+}
+
+function toggleIgnoreT() {
+  ignoreT = !ignoreT;
+  syncIgnoreTUI();
+  updatePrev();
+  updateSbOptions();
+}
+
+function syncIgnoreTUI() {
+  var card  = document.getElementById('opt-t-card');
+  var badge = document.getElementById('opt-t-badge');
+  var tog   = document.getElementById('opt-t-tog');
+  if (!card) return;
+  card.className  = 'ccard' + (ignoreT ? ' on' : '');
+  badge.className = 'cbadge ' + (ignoreT ? 'on' : 'off');
+  badge.textContent = ignoreT ? 'Aktiv' : 'Deaktiviert';
+  tog.className   = 'tog ' + (ignoreT ? 'on' : 'off');
+}
+
+function updateSbOptions() {
+  var el = document.getElementById('sb-opts');
+  if (!el) return;
+  el.style.display = ignoreT ? '' : 'none';
+}
+
+function buildCards() {
+  // wire ignoreT toggle
+  document.getElementById('opt-t-tog').onclick = function(){ toggleIgnoreT(); };
+  syncIgnoreTUI();
+
+  var el = document.getElementById('ccards');
+  el.innerHTML = '';
+  document.getElementById('noc').style.display = consts.length ? 'none' : 'block';
+  consts.forEach(function(c) {
+    var on  = !!vals[c];
+    var div = document.createElement('div');
+    div.className = 'ccard' + (on ? ' on' : '');
+    div.id = 'ccard_' + c;
+
+    var info = document.createElement('div');
+    info.style.flex = '1';
+    info.innerHTML = '<div class="cname">' + esc(c) + '</div>' +
+      '<div class="csub">' + (c.endsWith('_SC') ? 'System-Konfigurationskonstante' : 'System-Variantenkonstante') + '</div>';
+
+    var badge = document.createElement('span');
+    badge.className = 'cbadge ' + (on ? 'on' : 'off');
+    badge.id = 'cbadge_' + c;
+    badge.textContent = on ? 'TRUE / 1' : 'FALSE / 0';
+
+    var tog = document.createElement('button');
+    tog.className = 'tog ' + (on ? 'on' : 'off');
+    tog.id = 'ctog_' + c;
+    tog.innerHTML = '<div class="tog-k"></div>';
+    tog.addEventListener('click', (function(cc){ return function(){ toggleVal(cc); }; })(c));
+
+    div.appendChild(info);
+    div.appendChild(badge);
+    div.appendChild(tog);
+    el.appendChild(div);
+  });
+  updateSbCV();
+}
+
+function toggleVal(c) {
+  vals[c] = !vals[c];
+  var on = vals[c];
+  var card  = document.getElementById('ccard_' + c);
+  var badge = document.getElementById('cbadge_' + c);
+  var tog   = document.getElementById('ctog_' + c);
+  if (card)  card.className  = 'ccard' + (on ? ' on' : '');
+  if (badge) { badge.className = 'cbadge ' + (on ? 'on' : 'off'); badge.textContent = on ? 'TRUE / 1' : 'FALSE / 0'; }
+  if (tog)   tog.className = 'tog ' + (on ? 'on' : 'off');
+  if (curStep === 2) {
+    runCmp();          // live-recompute the result when toggled on the result step
+  } else {
+    updatePrev();
+    updateSbCV();
+  }
+}
+
+function updatePrev() {
+  document.getElementById('pbody0').textContent = reduce(codes[0], vals) || '(leer)';
+  document.getElementById('pbody1').textContent = reduce(codes[1], vals) || '(leer)';
+  document.getElementById('ptit0').textContent  = (names[0] || 'Original') + ' (Vorschau)';
+  document.getElementById('ptit1').textContent  = (names[1] || 'Modifiziert') + ' (Vorschau)';
+}
+
+// ── Compare ────────────────────────────────────────────────
+function runCmp() {
+  var ro = reduce(codes[0], vals);
+  var rm = reduce(codes[1], vals);
+  var d  = makeDiff(norm(ro), norm(rm));
+  dlines  = d.lines;
+  hasDiff = d.hasDiff;
+  onlyDiff = false;
+  curTab   = 0;
+  goStep(2);
+
+  var cnt = dlines.filter(function(l){ return l.t === 'c'; }).length;
+
+  // banner
+  document.getElementById('ban').className = 'ban ' + (hasDiff ? 'bad' : 'ok');
+  document.getElementById('bant').textContent = hasDiff ? '❌ Unterschiede gefunden' : '✅ Identisch — Funktionsneutrale Änderung bestätigt';
+  document.getElementById('bans').textContent = hasDiff ? cnt + ' abweichende Zeile' + (cnt !== 1 ? 'n' : '') : 'Beide Dateien sind nach der Reduktion identisch';
+
+  // tab labels
+  document.getElementById('tab1').textContent = '📄 ' + (names[0] || 'Original');
+  document.getElementById('tab2').textContent = '📝 ' + (names[1] || 'Modifiziert');
+  document.getElementById('dhd0').textContent  = names[0] || 'Original';
+  document.getElementById('dhd1').textContent  = names[1] || 'Modifiziert';
+
+  // filter button
+  document.getElementById('filtbtn').style.display = hasDiff ? '' : 'none';
+  document.getElementById('filtbtn').className = 'filt';
+  document.getElementById('filtbtn').textContent = 'Nur Unterschiede';
+
+  // code views
+  document.getElementById('cpre0').textContent = ro;
+  document.getElementById('cpre1').textContent = rm;
+
+  // footer badges
+  var fb = document.getElementById('footb');
+  fb.innerHTML = '';
+  consts.forEach(function(c) {
+    var on = !!vals[c];
+    var s  = document.createElement('span');
+    s.className = 'vb ' + (on ? 'on' : 'off');
+    s.textContent = c + '=' + (on ? '1' : '0');
+    fb.appendChild(s);
+  });
+
+  // sidebar result
+  var sr = document.getElementById('sb-res');
+  sr.className = 'res-pill ' + (hasDiff ? 'bad' : 'ok');
+  sr.style.display = 'block';
+  document.getElementById('sb-rt').textContent = hasDiff ? '❌ Unterschiede' : '✅ Identisch';
+  document.getElementById('sb-rs').textContent = hasDiff ? cnt + ' Zeile' + (cnt !== 1 ? 'n' : '') + ' abweichend' : '';
+  document.getElementById('sb-rsec').style.display = '';
+
+  drawDiff();
+  setTab(0);
+}
+
+function drawDiff() {
+  var el   = document.getElementById('drows');
+  el.innerHTML = '';
+  var rows = onlyDiff ? dlines.filter(function(l){ return l.t === 'c'; }) : dlines;
+  if (!rows.length) {
+    var e = document.createElement('div');
+    e.className = 'dempty'; e.textContent = 'Beide Dateien sind identisch ✓';
+    el.appendChild(e); return;
+  }
+  rows.forEach(function(l) {
+    var row = document.createElement('div');
+    row.className = 'drow' + (l.t === 'c' ? ' ch' : '');
+    var lc  = document.createElement('div'); lc.className = 'dl'; lc.textContent = l.l || '\u00A0';
+    var rc  = document.createElement('div'); rc.className = 'dr'; rc.textContent = l.r || '\u00A0';
+    row.appendChild(lc); row.appendChild(rc);
+    el.appendChild(row);
+  });
+}
+
+function togFilt() {
+  onlyDiff = !onlyDiff;
+  var b = document.getElementById('filtbtn');
+  b.className = 'filt' + (onlyDiff ? ' on' : '');
+  b.textContent = onlyDiff ? 'Alle Zeilen' : 'Nur Unterschiede';
+  drawDiff();
+}
+
+function setTab(n) {
+  curTab = n;
+  for (var i = 0; i < 3; i++) {
+    document.getElementById('view' + i).style.display = i === n ? '' : 'none';
+    document.getElementById('tab'  + i).classList.toggle('on', i === n);
+  }
+}
+
+// ── Sidebar consts ─────────────────────────────────────────
+function updateSbCV() {
+  var el = document.getElementById('sb-cv');
+  el.innerHTML = '';
+  document.getElementById('sb-csec').style.display = consts.length ? '' : 'none';
+  consts.forEach(function(c) {
+    var on  = !!vals[c];
+    var row = document.createElement('div');
+    row.className = 'cv-row' + (on ? ' on' : '');
+    var nm  = document.createElement('span'); nm.className = 'cv-name'; nm.textContent = c;
+    var tog = document.createElement('button');
+    tog.className = 'tog ' + (on ? 'on' : 'off');
+    tog.innerHTML = '<div class="tog-k"></div>';
+    tog.addEventListener('click', (function(cc){ return function(){ toggleVal(cc); }; })(c));
+    row.appendChild(nm); row.appendChild(tog);
+    el.appendChild(row);
+  });
+}
+
+// ── Step navigation ────────────────────────────────────────
+var TITLES = ['Dateien laden', 'Systemkonstanten konfigurieren', 'Vergleichsergebnis'];
+var ICONS  = ['◆', '◇', '⇄'];
+var LABELS = ['Dateien laden', 'Konstanten', 'Vergleich'];
+
+function goStep(n) {
+  curStep = n;
+
+  // show/hide steps
+  for (var i = 0; i < 3; i++) {
+    var s = document.getElementById('s' + i);
+    s.classList.toggle('on', i === n);
+    s.style.display = i === n ? 'flex' : 'none';
+  }
+
+  // topbar title
+  document.getElementById('ttitle').textContent = TITLES[n];
+
+  // stepper circles + lines
+  for (var i = 0; i < 3; i++) {
+    var sc = document.getElementById('sc' + i);
+    var sl = document.getElementById('sl' + i);
+    if (i < n)      { sc.className = 'sc done';   sc.textContent = '✓'; sl.className = 'sl done'; }
+    else if (i === n){ sc.className = 'sc active'; sc.textContent = '0' + (i+1); sl.className = 'sl active'; }
+    else             { sc.className = 'sc';        sc.textContent = '0' + (i+1); sl.className = 'sl'; }
+    if (i < 2) {
+      document.getElementById('sln' + i).className = 'sline' + (i < n ? ' done' : '');
+    }
+  }
+
+  // sidebar nav buttons
+  for (var i = 0; i < 3; i++) {
+    var btn = document.getElementById('sbn' + i);
+    btn.className = 'sb-nav' + (i === n ? ' active' : i < n ? ' done' : '');
+    btn.innerHTML = '<span class="ic">' + (i < n ? '✓' : ICONS[i]) + '</span>' + LABELS[i] + (i === n ? '<span class="sb-dot"></span>' : '');
+    if (i < n) {
+      btn.onclick = (function(ni){ return function(){ goStep(ni); }; })(i);
+    } else {
+      btn.onclick = null;
+    }
+  }
+
+  // sidebar sections
+  var showFiles = n > 0;
+  document.getElementById('sb-fsec').style.display = showFiles ? '' : 'none';
+  document.getElementById('sb-fbox').style.display = showFiles ? 'block' : 'none';
+  document.getElementById('sfo').textContent = names[0] || 'Original';
+  document.getElementById('sfm').textContent = names[1] || 'Modifiziert';
+
+  document.getElementById('sb-reset').style.display = n > 0 ? 'block' : 'none';
+
+  if (n < 2) {
+    document.getElementById('sb-res').style.display  = 'none';
+    document.getElementById('sb-rsec').style.display = 'none';
+  }
+  // options sidebar
+  var osec = document.getElementById('sb-osec');
+  var opts = document.getElementById('sb-opts');
+  if (osec) osec.style.display = (n >= 1 && ignoreT) ? '' : 'none';
+  if (opts) opts.style.display = (n >= 1 && ignoreT) ? '' : 'none';
+
+  updateSbCV();
+}
+
+// ── Reset ──────────────────────────────────────────────────
+function resetAll() {
+  codes = ['', '']; names = ['', '']; consts = []; vals = {};
+  dlines = []; hasDiff = false; onlyDiff = false; ignoreT = false; curStep = 0; curTab = 0;
+  for (var i = 0; i < 2; i++) {
+    document.getElementById('ta' + i).value = '';
+    document.getElementById('dh' + i).classList.remove('loaded');
+    document.getElementById('dname' + i).style.display = 'none';
+    document.getElementById('dico' + i).textContent = '📂';
+    document.getElementById('dlbl' + i).textContent = 'Datei ablegen oder klicken';
+    document.getElementById('finp' + i).value = '';
+  }
+  updateFooter();
+  goStep(0);
+}
+
+// ── Init ───────────────────────────────────────────────────
+updateFooter();
+goStep(0);
+
+// ── Theme & Uhr (Werkbank-konform) ─────────────────────────
+(function(){
+  var root = document.documentElement;
+  var meta = document.querySelector('meta[name="theme-color"]');
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function setTheme(t, save){
+    root.setAttribute('data-theme', t);
+    if (meta) meta.content = t === 'light' ? '#EEF1F6' : '#06090E';
+    if (save){ try { localStorage.setItem('wb-cockpit-theme', t); } catch(e){} }
+  }
+  var btn = document.getElementById('themeBtn');
+  if (btn) btn.addEventListener('click', function(){
+    setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light', true);
+  });
+  if (meta) meta.content = root.getAttribute('data-theme') === 'light' ? '#EEF1F6' : '#06090E';
+  var clock = document.getElementById('clock');
+  if (clock){
+    var tick = function(){ var d = new Date(); clock.textContent = pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+    tick(); setInterval(tick, 15000);
+  }
+})();
+</script>
+</body>
+</html>
