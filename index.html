@@ -19,6 +19,34 @@ button{min-width:24px}
 
 /* Design-Check 19.11.2026: Akzentfarben als Text im hellen Modus dunkler */
 html[data-theme="light"]{--amber-text:#8A5A00;--teal-text:#0F6E5E}
+
+/* XDI-Abgleich */
+.xdi{padding:18px 22px 40px;display:flex;flex-direction:column;gap:14px;max-width:1100px}
+.xdi-lead{margin:0;color:var(--text-2);font-size:13px}
+.xdi-dz{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.xdi-drop{display:flex;flex-direction:column;gap:4px;padding:18px;border:1.5px dashed var(--line-strong,rgba(128,128,128,.35));border-radius:14px;cursor:pointer;background:var(--surface,transparent)}
+.xdi-drop:hover,.xdi-drop.over{border-color:var(--amber)}
+.xdi-drop b{font-size:14px}.xdi-drop span{font-size:12px;color:var(--text-2);word-break:break-all}
+.xdi-drop.ok{border-style:solid;border-color:var(--teal)}.xdi-drop.err{border-style:solid;border-color:#D2484F}
+.xdi-cfg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:10px 12px;border:1px solid var(--line,rgba(128,128,128,.2));border-radius:12px}
+.xdi-cfgk{display:flex;gap:6px;align-items:center;font-size:12px}
+.xdi-cfg select{font:inherit;font-size:12px;padding:3px 6px;border-radius:8px;border:1px solid var(--line-strong,rgba(128,128,128,.35));background:transparent;color:inherit;max-width:220px}
+.xdi-chk{font-size:12px;display:flex;gap:5px;align-items:center}
+.xdi-btn{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid var(--line-strong,rgba(128,128,128,.35));background:transparent;color:inherit;cursor:pointer}
+.xdi-btn:hover{border-color:var(--amber)}
+.xdi-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.xdi-k{border:1px solid var(--line,rgba(128,128,128,.2));border-radius:12px;padding:10px 12px}
+.xdi-k b{display:block;font-size:22px;font-family:var(--mono,monospace)}.xdi-k span{font-size:12px;color:var(--text-2)}
+.xdi-k.rot b{color:#D2484F}.xdi-k.ok b{color:var(--teal)}
+.xdi-sec{border:1px solid var(--line,rgba(128,128,128,.2));border-radius:12px;overflow:hidden}
+.xdi-sec>h3{margin:0;padding:8px 12px;font-size:13px;display:flex;gap:8px;align-items:center;background:rgba(128,128,128,.06)}
+.xdi-sec>h3 .sp{flex:1}
+.xdi-sec table{width:100%;border-collapse:collapse;font-size:12px}
+.xdi-sec td,.xdi-sec th{padding:4px 12px;border-top:1px solid var(--line,rgba(128,128,128,.15));text-align:left}
+.xdi-sec td.m{font-family:var(--mono,monospace)}
+.xdi-err{padding:10px 12px;border:1px solid #D2484F;border-radius:12px;font-size:12px;white-space:pre-wrap}
+.xdi-leer{padding:8px 12px;font-size:12px;color:var(--text-2)}
+#xout{display:flex;flex-direction:column;gap:12px}
 </style>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>CodeCompare · Review Funktionsentwurf · Kontor</title>
@@ -471,6 +499,23 @@ html[data-theme="light"] .moon{display:none}
   </div>
 
   <!-- STEP 2 -->
+  <!-- XDI-Abgleich (seit 19.11.2026): XDI Data und XDI Doc prüfen, Objekte abgleichen, Doppelte finden, Fehlendes anlegen -->
+  <div class="step" id="sx" style="flex-direction:column;overflow:auto">
+    <div class="xdi">
+      <p class="xdi-lead">Zwei XML-Dateien ablegen. Geprüft wird: gültiges XML, welche Objekte nur in einer Datei stehen und welche doppelt vorkommen. Alles bleibt im Browser.</p>
+      <div class="xdi-dz">
+        <label class="xdi-drop" id="xdrop0" tabindex="0"><input type="file" id="xin0" hidden accept=".xml,.xdi,.arxml,.txt,*/*"><b>XDI Data</b><span id="xname0">Datei ablegen oder klicken</span></label>
+        <label class="xdi-drop" id="xdrop1" tabindex="0"><input type="file" id="xin1" hidden accept=".xml,.xdi,.arxml,.txt,*/*"><b>XDI Doc</b><span id="xname1">Datei ablegen oder klicken</span></label>
+      </div>
+      <div class="xdi-cfg" id="xcfg" hidden>
+        <div class="xdi-cfgk"><b>Objekt in Data</b><select id="xtag0" aria-label="Objekt-Element in XDI Data"></select><select id="xkey0" aria-label="Schlüssel in XDI Data"></select></div>
+        <div class="xdi-cfgk"><b>Objekt im Doc</b><select id="xtag1" aria-label="Objekt-Element in XDI Doc"></select><select id="xkey1" aria-label="Schlüssel in XDI Doc"></select></div>
+        <label class="xdi-chk"><input type="checkbox" id="xcase"> Groß/Klein ignorieren</label>
+        <button type="button" class="xdi-btn" id="xcsv">Befunde als CSV</button>
+      </div>
+      <div id="xout"></div>
+    </div>
+  </div>
   <div class="step" id="s2" style="flex-direction:column;overflow:hidden">
     <div id="res-ban">
       <div class="ban" id="ban">
@@ -1805,6 +1850,7 @@ var LABELS = ['Dateien laden', 'Konstanten', 'Vergleich'];
 
 function goStep(n) {
   curStep = n;
+  if (window.xdiVerlassen) window.xdiVerlassen(); // XDI-Abgleich schliessen
 
   // show/hide steps
   for (var i = 0; i < 3; i++) {
@@ -2018,5 +2064,186 @@ WBMarke.start({ziel:'#main',schritt:function(){return '5r';}});
   if(!n||n==='opt-t-tog'){var k=b.parentElement&&b.parentElement.querySelector('.cname,.lbl,span,label');n=k?k.textContent.trim():'Schalter';}
   if(b.id==='opt-t-tog')n=n||'Option';b.setAttribute('aria-label',n);b.setAttribute('aria-pressed',b.classList.contains('on')?'true':'false');});}
  new MutationObserver(nennen).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});nennen();})();</script>
+<script>
+/* ── XDI-Abgleich (seit 19.11.2026) ─────────────────────────────
+   Liest zwei XML-Dateien (XDI Data, XDI Doc), schlägt je Datei das Objekt-Element
+   und den Schlüssel vor (häufigstes Element mit Name/ID), gleicht beide Seiten ab,
+   findet Doppelte und legt fehlende Objekte nach dem Muster des ersten vorhandenen an. */
+(function(){
+  'use strict';
+  var X = [{ name:'', text:'', doc:null, fehler:'' }, { name:'', text:'', doc:null, fehler:'' }];
+  var NAMEN = ['name','Name','NAME','id','ID','Id','shortName','ShortName','SHORT-NAME','short-name','key','Key','label','Label','ident','Ident','uuid','UUID'];
+  var $x = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; }); }
+
+  /* Sidebar-Eintrag und Anzeige */
+  function zeigen(){
+    for (var i = 0; i < 3; i++) { var s = $x('s' + i); if (s) { s.classList.remove('on'); s.style.display = 'none'; } }
+    var sx = $x('sx'); sx.classList.add('on'); sx.style.display = 'flex';
+    $x('ttitle').textContent = 'XDI-Abgleich';
+    document.querySelectorAll('.sb-nav').forEach(function(b){ b.classList.toggle('active', b.id === 'sbnx'); });
+    var st = $x('stepper'); if (st) st.style.visibility = 'hidden';
+    /* zurück zum aktuellen Vergleichsschritt ueber dessen Sidebar-Eintrag */
+    var c = typeof curStep === 'number' ? curStep : 0, sb = $x('sbn' + c); if (sb) sb.onclick = function(){ goStep(c); };
+  }
+  window.xdiVerlassen = function(){ var sx = $x('sx'); if (sx) { sx.classList.remove('on'); sx.style.display = 'none'; } var st = $x('stepper'); if (st) st.style.visibility = ''; var n = $x('sbnx'); if (n) n.classList.remove('active'); };
+
+  /* Datei lesen */
+  function laden(i, f){
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var t = String(r.result || ''), o = X[i];
+      o.name = f.name; o.text = t; o.fehler = ''; o.doc = null;
+      try {
+        var d = new DOMParser().parseFromString(t, 'application/xml');
+        var pe = d.getElementsByTagName('parsererror')[0];
+        if (pe) o.fehler = (pe.textContent || 'Kein gültiges XML').replace(/This page contains the following errors:/i, '').replace(/Below is a rendering[\s\S]*$/i, '').replace(/\s+/g, ' ').trim(); else o.doc = d;
+      } catch (e) { o.fehler = String(e && e.message || e); }
+      var dz = $x('xdrop' + i); dz.classList.toggle('ok', !!o.doc); dz.classList.toggle('err', !o.doc);
+      $x('xname' + i).textContent = f.name + (o.doc ? ' · gültiges XML' : ' · kein gültiges XML');
+      if (o.doc) vorschlagen(i);
+      rechnen();
+    };
+    r.readAsText(f);
+  }
+
+  /* Schlüssel eines Elements nach Wahl: "@attr" oder "<kind>" */
+  function schluessel(el, k){
+    if (!k) return '';
+    if (k.charAt(0) === '@') return (el.getAttribute(k.slice(1)) || '').trim();
+    var kn = k.slice(1, -1);
+    for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (c.localName === kn || c.nodeName === kn) return (c.textContent || '').trim();
+    return '';
+  }
+  function kandidaten(el){
+    var out = [];
+    NAMEN.forEach(function(n){ if (el.hasAttribute && el.hasAttribute(n)) out.push('@' + n); });
+    for (var c = el.firstElementChild; c; c = c.nextElementSibling) if (NAMEN.indexOf(c.localName) >= 0 && !c.firstElementChild) out.push('<' + c.localName + '>');
+    return out;
+  }
+  /* Häufigstes Element mit Namen/ID vorschlagen */
+  function vorschlagen(i){
+    var o = X[i], z = {}, alle = o.doc.getElementsByTagName('*');
+    for (var j = 0; j < alle.length; j++) {
+      var el = alle[j], ks = kandidaten(el); if (!ks.length) continue;
+      var t = el.localName; if (!z[t]) z[t] = { n:0, k:{} }; z[t].n++;
+      ks.forEach(function(k){ z[t].k[k] = (z[t].k[k] || 0) + 1; });
+    }
+    var tags = Object.keys(z).sort(function(a, b){ return z[b].n - z[a].n; });
+    o.z = z;
+    var st = $x('xtag' + i);
+    st.innerHTML = tags.map(function(t){ return '<option value="' + esc(t) + '">' + esc(t) + ' (' + z[t].n + ')</option>'; }).join('') || '<option value="">– kein Element mit Name/ID –</option>';
+    /* Gleiches Element wie die andere Seite bevorzugen, sonst das häufigste */
+    var andere = X[1 - i].tag; o.tag = andere && z[andere] ? andere : (tags[0] || '');
+    st.value = o.tag; schluesselListe(i);
+  }
+  function schluesselListe(i){
+    var o = X[i], sk = $x('xkey' + i), e = o.z && o.z[o.tag];
+    var ks = e ? Object.keys(e.k).sort(function(a, b){ return e.k[b] - e.k[a]; }) : [];
+    sk.innerHTML = ks.map(function(k){ return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('');
+    o.key = ks[0] || ''; sk.value = o.key;
+  }
+  function objekte(i){
+    var o = X[i]; if (!o.doc || !o.tag) return [];
+    var els = o.doc.getElementsByTagName('*'), out = [];
+    for (var j = 0; j < els.length; j++) if (els[j].localName === o.tag) { var k = schluessel(els[j], o.key); if (k) out.push({ k:k, el:els[j] }); }
+    return out;
+  }
+  function zeile(i, k){
+    var t = X[i].text; if (!t) return '';
+    var p = t.indexOf('"' + k + '"'); if (p < 0) p = t.indexOf('>' + k + '<'); if (p < 0) return '';
+    return String(t.slice(0, p).split('\n').length);
+  }
+
+  var B = null;
+  function rechnen(){
+    var out = $x('xout'), h = '';
+    X.forEach(function(o, i){ if (o.fehler) h += '<div class="xdi-err"><b>' + (i ? 'XDI Doc' : 'XDI Data') + ' – kein gültiges XML</b>\n' + esc(o.fehler) + '</div>'; });
+    var bereit = X[0].doc && X[1].doc;
+    $x('xcfg').hidden = !(X[0].doc || X[1].doc);
+    if (!bereit) { out.innerHTML = h || '<div class="xdi-leer">Beide Dateien ablegen, dann erscheint der Abgleich.</div>'; B = null; return; }
+    var ci = $x('xcase').checked, n = function(s){ return ci ? s.toLowerCase() : s; };
+    var A = objekte(0), D = objekte(1), mA = {}, mD = {};
+    A.forEach(function(x){ (mA[n(x.k)] = mA[n(x.k)] || []).push(x); });
+    D.forEach(function(x){ (mD[n(x.k)] = mD[n(x.k)] || []).push(x); });
+    var nurD = Object.keys(mD).filter(function(k){ return !mA[k]; }).map(function(k){ return mD[k][0].k; });
+    var nurA = Object.keys(mA).filter(function(k){ return !mD[k]; }).map(function(k){ return mA[k][0].k; });
+    var dopA = Object.keys(mA).filter(function(k){ return mA[k].length > 1; }).map(function(k){ return { k:mA[k][0].k, n:mA[k].length }; });
+    var dopD = Object.keys(mD).filter(function(k){ return mD[k].length > 1; }).map(function(k){ return { k:mD[k][0].k, n:mD[k].length }; });
+    B = { nurD:nurD, nurA:nurA, dopA:dopA, dopD:dopD };
+    var gemeinsam = Object.keys(mA).filter(function(k){ return mD[k]; }).length;
+    h += '<div class="xdi-sum">'
+      + '<div class="xdi-k ok"><b>' + gemeinsam + '</b><span>in beiden</span></div>'
+      + '<div class="xdi-k' + (nurD.length ? ' rot' : '') + '"><b>' + nurD.length + '</b><span>nur im Doc</span></div>'
+      + '<div class="xdi-k' + (nurA.length ? ' rot' : '') + '"><b>' + nurA.length + '</b><span>nur im Data</span></div>'
+      + '<div class="xdi-k' + (dopA.length + dopD.length ? ' rot' : '') + '"><b>' + (dopA.length + dopD.length) + '</b><span>doppelt (Data ' + dopA.length + ' · Doc ' + dopD.length + ')</span></div></div>';
+    function liste(titel, arr, i, anlegen){
+      var k = '<div class="xdi-sec"><h3>' + titel + ' <span class="sp"></span>' + (anlegen && arr.length ? '<button type="button" class="xdi-btn" data-xdi-anlegen="' + anlegen + '">' + arr.length + ' im ' + (anlegen === 'data' ? 'Data' : 'Doc') + ' anlegen und herunterladen</button>' : '') + '</h3>';
+      if (!arr.length) return k + '<div class="xdi-leer">keine</div></div>';
+      return k + '<table><tbody>' + arr.map(function(x){ var key = x.k || x; return '<tr><td class="m">' + esc(key) + '</td><td>' + (x.n ? x.n + '×' : '') + '</td><td>' + (zeile(i, key) ? 'Zeile ' + zeile(i, key) : '') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+    }
+    h += liste('Nur im Doc – fehlt im Data', nurD, 1, 'data');
+    h += liste('Nur im Data – fehlt im Doc', nurA, 0, 'doc');
+    h += liste('Doppelt im Data', dopA, 0);
+    h += liste('Doppelt im Doc', dopD, 1);
+    out.innerHTML = h;
+  }
+
+  /* Fehlende nach dem Muster des ersten Objekts anlegen; Ergebnis als neue Datei */
+  function anlegen(ziel){
+    var i = ziel === 'data' ? 0 : 1, o = X[i], keys = ziel === 'data' ? B.nurD : B.nurA;
+    var vor = objekte(i); if (!vor.length) { alert('In dieser Datei gibt es kein Objekt als Muster.'); return; }
+    var muster = vor[vor.length - 1].el, nach = muster;
+    keys.forEach(function(k){
+      var neu = muster.cloneNode(true);
+      if (o.key.charAt(0) === '@') neu.setAttribute(o.key.slice(1), k);
+      else { var kn = o.key.slice(1, -1); for (var c = neu.firstElementChild; c; c = c.nextElementSibling) if (c.localName === kn) c.textContent = k; }
+      neu.setAttribute && neu.setAttribute('data-xdi-neu', 'angelegt ' + new Date().toISOString().slice(0, 10));
+      nach.parentNode.insertBefore(o.doc.createTextNode('\n'), nach.nextSibling);
+      nach.parentNode.insertBefore(neu, nach.nextSibling.nextSibling); nach = neu;
+    });
+    var xml = new XMLSerializer().serializeToString(o.doc);
+    if (!/^<\?xml/.test(xml) && /^<\?xml/.test(o.text)) xml = o.text.match(/^<\?xml[^>]*\?>/)[0] + '\n' + xml;
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([xml], { type:'application/xml' }));
+    a.download = o.name.replace(/(\.[^.]+)?$/, '_ergaenzt$1'); document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+    o.text = xml; rechnen();
+  }
+  function csv(){
+    if (!B) return;
+    var z = [['Befund','Objekt','Anzahl']];
+    B.nurD.forEach(function(k){ z.push(['nur im Doc', k, '']); }); B.nurA.forEach(function(k){ z.push(['nur im Data', k, '']); });
+    B.dopA.forEach(function(x){ z.push(['doppelt im Data', x.k, x.n]); }); B.dopD.forEach(function(x){ z.push(['doppelt im Doc', x.k, x.n]); });
+    var t = '﻿' + z.map(function(r){ return r.map(function(v){ return '"' + String(v).replace(/"/g, '""') + '"'; }).join(';'); }).join('\r\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], { type:'text/csv' })); a.download = 'xdi-abgleich.csv';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+
+  function start(){
+    var sb = document.getElementById('sbn2'); if (!sb || $x('sbnx')) return;
+    var sec = document.createElement('div'); sec.className = 'sb-sec'; sec.textContent = 'Weitere Prüfung';
+    var nav = document.createElement('div'); nav.id = 'sbnx'; nav.className = 'sb-nav'; nav.setAttribute('role', 'button'); nav.tabIndex = 0;
+    nav.innerHTML = '<span class="ic">⊞</span>XDI-Abgleich';
+    sb.parentNode.insertBefore(nav, sb.nextSibling); sb.parentNode.insertBefore(sec, nav);
+    nav.addEventListener('click', zeigen); nav.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); zeigen(); } });
+    [0, 1].forEach(function(i){
+      var dz = $x('xdrop' + i), inp = $x('xin' + i);
+      inp.addEventListener('change', function(){ laden(i, inp.files[0]); inp.value = ''; });
+      dz.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inp.click(); } });
+      dz.addEventListener('dragover', function(e){ e.preventDefault(); dz.classList.add('over'); });
+      dz.addEventListener('dragleave', function(){ dz.classList.remove('over'); });
+      dz.addEventListener('drop', function(e){ e.preventDefault(); dz.classList.remove('over'); laden(i, e.dataTransfer.files[0]); });
+      $x('xtag' + i).addEventListener('change', function(e){ X[i].tag = e.target.value; schluesselListe(i); rechnen(); });
+      $x('xkey' + i).addEventListener('change', function(e){ X[i].key = e.target.value; rechnen(); });
+    });
+    $x('xcase').addEventListener('change', rechnen);
+    $x('xcsv').addEventListener('click', csv);
+    $x('xout').addEventListener('click', function(e){ var b = e.target.closest('[data-xdi-anlegen]'); if (b) anlegen(b.getAttribute('data-xdi-anlegen')); });
+    rechnen();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 </body>
 </html>
