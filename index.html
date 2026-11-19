@@ -402,7 +402,7 @@ html[data-theme="light"] .moon{display:none}
         </div>
         <div class="dz-ta">
           <div class="dz-ta-lbl">Oder direkt einfügen</div>
-          <textarea id="ta0" placeholder="// Code hier einfügen…"></textarea>
+          <textarea id="ta0" aria-label="Original-Code" placeholder="// Code hier einfügen…"></textarea>
         </div>
       </div>
       <!-- Modified -->
@@ -420,7 +420,7 @@ html[data-theme="light"] .moon{display:none}
         </div>
         <div class="dz-ta">
           <div class="dz-ta-lbl">Oder direkt einfügen</div>
-          <textarea id="ta1" placeholder="// Code hier einfügen…"></textarea>
+          <textarea id="ta1" aria-label="Geänderter Code" placeholder="// Code hier einfügen…"></textarea>
         </div>
       </div>
     </div>
@@ -1994,6 +1994,7 @@ WBTor.start(function(){
       if (ak && ak.id && kp && Array.isArray(kp.auftraege)) au = kp.auftraege.filter(function(a){ return a.id === ak.id; })[0] || null;
       if (au && s.kp && au.schritte && au.schritte[s.kp]) st = au.schritte[s.kp].status || '';
       var w = WEITER[k] && S[WEITER[k]], f = FARBE[st];
+      el.setAttribute('aria-label', 'Prozessschritt ' + marke(s));
       var key = [k, ak && ak.id, ak && ak.titel, st, w && w.name].join('|'); if (key === letzt) return; letzt = key;
       var href = w && w.id && REPO[w.id] ? '../' + REPO[w.id] + '/' + (w.id === 'anforderungsbuch' && w.tab ? '#' + w.tab : '') : '';
       el.innerHTML =
@@ -2012,5 +2013,10 @@ WBTor.start(function(){
 })();
 WBMarke.start({ziel:'#main',schritt:function(){return '5r';}});
 /* ═══ WBMarke-Ende */</script>
+<script>/* Design-Check 19.11.2026: Schalter (.tog) benennen – Name der Konstante, Zustand als aria-pressed */
+(function(){function nennen(){document.querySelectorAll('button.tog').forEach(function(b){var c=b.closest('.ccard,[id^="ccard_"],.crow,li,div');var n=(b.id||'').replace(/^ctog_/,'');
+  if(!n||n==='opt-t-tog'){var k=b.parentElement&&b.parentElement.querySelector('.cname,.lbl,span,label');n=k?k.textContent.trim():'Schalter';}
+  if(b.id==='opt-t-tog')n=n||'Option';b.setAttribute('aria-label',n);b.setAttribute('aria-pressed',b.classList.contains('on')?'true':'false');});}
+ new MutationObserver(nennen).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});nennen();})();</script>
 </body>
 </html>
